@@ -1,0 +1,190 @@
+import random
+import os
+import time
+
+# Hangman stages for visualization
+HANGMAN_PICS = [
+    """
+       -----
+       |   |
+           |
+           |
+           |
+           |
+    =========
+    """,
+    """
+       -----
+       |   |
+       O   |
+           |
+           |
+           |
+    =========
+    """,
+    """
+       -----
+       |   |
+       O   |
+       |   |
+           |
+           |
+    =========
+    """,
+    """
+       -----
+       |   |
+       O   |
+      /|   |
+           |
+           |
+    =========
+    """,
+    """
+       -----
+       |   |
+       O   |
+      /|\\  |
+           |
+           |
+    =========
+    """,
+    """
+       -----
+       |   |
+       O   |
+      /|\\  |
+      /    |
+           |
+    =========
+    """,
+    """
+       -----
+       |   |
+       O   |
+      /|\\  |
+      / \\  |
+           |
+    =========
+    """
+]
+
+# Words and hints for each level
+LEVELS = {
+    1: [
+        ("apple", "A sweet fruit commonly found in desserts."),
+        ("chair", "Used for sitting."),
+        ("water", "A liquid essential for life."),
+        ("house", "A place where people live."),
+    ],
+    2: [
+        ("bottle", "Used to store liquids."),
+        ("garden", "A place with plants and flowers."),
+        ("window", "An opening to let light in."),
+        ("bridge", "A structure that connects two places."),
+    ],
+    3: [
+        ("umbrella", "Used during rain to stay dry."),
+        ("laptop", "A portable computer."),
+        ("diamond", "A precious gemstone."),
+        ("monkey", "A playful animal often seen on trees."),
+    ],
+    4: [
+        ("volcano", "A mountain that erupts lava."),
+        ("battery", "Powers electronic devices."),
+        ("pyramid", "A triangular structure in Egypt."),
+        ("pencil", "Used for writing or drawing."),
+    ],
+    5: [
+        ("oxygen", "An essential gas for breathing."),
+        ("satellite", "Orbits planets to collect data."),
+        ("astronaut", "A person who travels to space."),
+        ("algorithm", "A step-by-step problem-solving method."),
+    ],
+    6: [
+        ("syllable", "A unit of pronunciation in a word."),
+        ("hemisphere", "Half of the Earth or a sphere."),
+        ("quarantine", "A period of isolation for the sick."),
+        ("parliament", "A legislative body of a country."),
+    ],
+}
+
+def clear_screen():
+    """Clear the terminal screen for a better visual experience."""
+    print("\033[H\033[J", end="")
+
+def play_hangman():
+    print("Welcome to Hangman!")
+    time.sleep(2)  # Pause for a moment before starting
+
+    total_points = 0  # Track total points
+    
+    for level, words in LEVELS.items():
+        clear_screen()
+        print(f"Level {level} - Good Luck!")
+        word, hint = random.choice(words)
+        max_wrong_guesses = len(HANGMAN_PICS) - 1
+        wrong_guesses = 0
+        guessed_word = ["_"] * len(word)
+        guessed_letters = set()
+        level_points = 10  # Points for guessing this word correctly
+
+        while wrong_guesses < max_wrong_guesses:
+            clear_screen()
+            print(HANGMAN_PICS[wrong_guesses])  # Update hangman visual
+            print("\nWord: " + " ".join(guessed_word))
+            print(f"Guesses remaining: {max_wrong_guesses - wrong_guesses}")
+            print(f"Current Level Points: {level_points}")
+            print(f"Total Points: {total_points}")
+            
+            if max_wrong_guesses - wrong_guesses == 2:  # Provide a hint when 2 wrong guesses remain
+                print(f"Hint: {hint}")
+            
+            guess = input("\nGuess a letter: ").lower()
+            
+            if len(guess) != 1 or not guess.isalpha():
+                print("Please enter a single valid letter.")
+                time.sleep(1)  # Pause briefly to display the message
+                continue
+            
+            if guess in guessed_letters:
+                print("You already guessed that letter. Try again.")
+                time.sleep(1)
+                continue
+            
+            guessed_letters.add(guess)
+            
+            if guess in word:
+                for i, letter in enumerate(word):
+                    if letter == guess:
+                        guessed_word[i] = guess
+                if "_" not in guessed_word:
+                    clear_screen()
+                    print(HANGMAN_PICS[wrong_guesses])
+                    print("\nWord: " + " ".join(guessed_word))
+                    print("\nCongratulations! You guessed the word:", word)
+                    print(f"You earned {level_points} points!")
+                    total_points += level_points
+                    time.sleep(2)
+                    break
+            else:
+                wrong_guesses += 1
+                level_points -= 2  # Deduct points for wrong guesses
+        
+        if "_" in guessed_word:
+            clear_screen()
+            print(HANGMAN_PICS[wrong_guesses])
+            print("\nYou ran out of guesses. The word was:", word)
+            print(f"You lost {level_points} points for this level.")
+            total_points += max(0, level_points)  # Add remaining points if any
+            time.sleep(2)
+            break
+    else:
+        clear_screen()
+        print("\nCongratulations! You completed all levels!")
+    
+    # Final score display
+    print(f"Your total score is: {total_points}")
+
+if __name__ == "__main__":
+    play_hangman()
